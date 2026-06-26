@@ -10,6 +10,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ------------------------------------------------------
+// Phase 1: Core Accounting
+// ------------------------------------------------------
+
 model Account {
   id          String        @id @default(uuid())
   code        String        @unique // e.g. '1001'
@@ -27,6 +31,8 @@ model JournalEntry {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   transactions Transaction[]
+  // Link automatically generated journal entries back to the invoice that created them
+  invoice     Invoice?      @relation("InvoiceJournal")
 }
 
 model Transaction {
@@ -40,4 +46,57 @@ model Transaction {
 
   account        Account      @relation(fields: [accountId], references: [id])
   journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id])
+}
+
+// ------------------------------------------------------
+// Phase 2: Invoicing & Inventory
+// ------------------------------------------------------
+
+model Customer {
+  id        String    @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  invoices  Invoice[]
+}
+
+model Item {
+  id          String            @id @default(uuid())
+  name        String
+  description String?
+  price       Float             // Selling price
+  stockQty    Int               @default(0)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  invoiceLine InvoiceLineItem[]
+}
+
+model Invoice {
+  id             String            @id @default(uuid())
+  invoiceNumber  String            @unique
+  date           DateTime          @default(now())
+  customerId     String
+  totalAmount    Float             @default(0)
+  status         String            @default("DRAFT") // DRAFT, PAID, OVERDUE
+  journalEntryId String?           @unique // Link to the auto-generated JE
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  customer       Customer          @relation(fields: [customerId], references: [id])
+  journalEntry   JournalEntry?     @relation("InvoiceJournal", fields: [journalEntryId], references: [id])
+  lineItems      InvoiceLineItem[]
+}
+
+model InvoiceLineItem {
+  id        String   @id @default(uuid())
+  invoiceId String
+  itemId    String
+  quantity  Int      @default(1)
+  unitPrice Float    // Price at the time of sale
+  total     Float
+
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  item      Item     @relation(fields: [itemId], references: [id])
 }
