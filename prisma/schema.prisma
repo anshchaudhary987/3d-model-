@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id          String        @id @default(uuid())
+  code        String        @unique // e.g. '1001'
+  name        String        // e.g. 'Cash'
+  type        String        // Asset, Liability, Equity, Revenue, Expense
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  transactions Transaction[]
+}
+
+model JournalEntry {
+  id          String        @id @default(uuid())
+  date        DateTime      @default(now())
+  description String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  transactions Transaction[]
+}
+
+model Transaction {
+  id             String       @id @default(uuid())
+  accountId      String
+  journalEntryId String
+  debit          Float        @default(0) // In a real system, consider using Decimal/Int
+  credit         Float        @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  account        Account      @relation(fields: [accountId], references: [id])
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id])
+}
