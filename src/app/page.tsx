@@ -7,10 +7,11 @@ import JournalEntriesList from '@/components/JournalEntriesList';
 import InvoicingView from '@/components/InvoicingView';
 import CustomerForm from '@/components/CustomerForm';
 import ItemForm from '@/components/ItemForm';
+import ReportsView from '@/components/ReportsView';
 
 export default function Home() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [activeTab, setActiveTab] = useState<'accounting' | 'invoicing'>('invoicing'); // Default to new feature
+  const [activeTab, setActiveTab] = useState<'accounting' | 'invoicing' | 'reports'>('reports'); // Default to new feature
 
   const handleAction = () => {
     setRefreshTrigger(prev => prev + 1);
@@ -34,19 +35,25 @@ export default function Home() {
                 className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'accounting' ? 'bg-indigo-800 text-white' : 'text-indigo-200 hover:bg-indigo-700 hover:text-white'}`}>
                 Core Accounting
               </button>
+              <button
+                onClick={() => setActiveTab('reports')}
+                className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'reports' ? 'bg-indigo-800 text-white' : 'text-indigo-200 hover:bg-indigo-700 hover:text-white'}`}>
+                Financial Reports
+              </button>
             </nav>
           </div>
 
-          <span className="px-3 py-1 bg-indigo-700 rounded-full text-xs font-bold tracking-wide">Phase 2</span>
+          <span className="px-3 py-1 bg-indigo-700 rounded-full text-xs font-bold tracking-wide">Phase 3</span>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
         {/* Tab Navigation for Mobile (visible only on small screens) */}
-        <div className="md:hidden flex space-x-2 mb-6">
+        <div className="md:hidden flex space-x-2 mb-6 text-sm">
            <button onClick={() => setActiveTab('invoicing')} className={`flex-1 py-2 text-center rounded-md ${activeTab === 'invoicing' ? 'bg-indigo-100 text-indigo-700 font-bold' : 'bg-white border text-gray-500'}`}>Invoicing</button>
            <button onClick={() => setActiveTab('accounting')} className={`flex-1 py-2 text-center rounded-md ${activeTab === 'accounting' ? 'bg-indigo-100 text-indigo-700 font-bold' : 'bg-white border text-gray-500'}`}>Accounting</button>
+           <button onClick={() => setActiveTab('reports')} className={`flex-1 py-2 text-center rounded-md ${activeTab === 'reports' ? 'bg-indigo-100 text-indigo-700 font-bold' : 'bg-white border text-gray-500'}`}>Reports</button>
         </div>
 
         {activeTab === 'invoicing' && (
@@ -73,6 +80,12 @@ export default function Home() {
             <div className="lg:col-span-1">
               <AccountsList key={`acc-${refreshTrigger}`} />
             </div>
+          </div>
+        )}
+
+        {activeTab === 'reports' && (
+          <div className="mt-4">
+            <ReportsView />
           </div>
         )}
 
